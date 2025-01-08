@@ -1,0 +1,163 @@
+<% layout("../Layouts/boilerplate") %>
+<script>
+    const listing = '<%- JSON.stringify(item) %>';
+</script>
+
+<body>
+
+    <div class="row">
+        <div class="col-6 offset-3">
+            <h3 class="ml-4">Listing Details</h3>
+            <img src="<%= item.image.url %>" alt="listing_image" class="card-img-top show-img">
+        </div>
+    </div>
+    <div class="listing-card col-6 offset-3">
+        <div class="card-body">
+            <p class="card-text">Owned by <i><%= item.owner.username %></i></p>
+            <p class="card-text"><%= item.title %> <br>
+                <ul>
+                    <li><%= item.description %></li>
+                    <li>&#8377; <%= item.price %>/night</li>
+                    <li><%= item.location %></li>
+                    <li><%= item.country %></li>
+                </ul>
+            </p>
+            
+        </div>
+    </div>
+    
+    <div class="mb-5 offset-3">
+        <% if(currUser && currUser._id.equals(item.owner._id)) {%>
+            <a href="/listings/<%= item._id %>/edit" class="btn btn-danger mb-3">Edit the form</a>
+            <form action="/listings/<%= item._id %>?_method=DELETE" method="post">
+                <button class="btn btn-dark mt-1">Delete this listing</button>
+            </form>
+        <% } %>
+        <br>
+        <a href="/listings" class="btn btn-dark">Go back</a><br>
+    </div>
+    <div class="col-8 offset-3">
+        <% if(currUser) {%>
+        <h4>Leave a Review</h4>
+        <form action="/listings/<%= item._id %>/reviews"  method="post" novalidate class="needs-validation">
+            <!-- <div class="mb-3 mt-3">
+                <label for="rating" class="form-label">Rating</label>
+                <input type="range" min="1" max="5" id="rating" name="review[rating]">
+            </div> -->
+            <fieldset class="starability-basic">
+                <legend>First rating:</legend>
+                <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="0" checked aria-label="No rating." />
+                <input type="radio" id="first-rate1" name="review[rating]" value="1" />
+                <label for="first-rate1" title="Terrible">1 star</label>
+                <input type="radio" id="first-rate2" name="review[rating]" value="2" />
+                <label for="first-rate2" title="Not good">2 stars</label>
+                <input type="radio" id="first-rate3" name="review[rating]" value="3" />
+                <label for="first-rate3" title="Average">3 stars</label>
+                <input type="radio" id="first-rate4" name="review[rating]" value="4" />
+                <label for="first-rate4" title="Very good">4 stars</label>
+                <input type="radio" id="first-rate5" name="review[rating]" value="5" />
+                <label for="first-rate5" title="Amazing">5 stars</label>
+              </fieldset>
+            <div class="mb-3 mt-3">
+                <label for="comment" class="form-label">Comments</label>
+                <textarea name="review[comment]" id="comment" cols="30" rows="10"class="form-control" required></textarea>
+                <div class="invalid-feedback">Please submit some comments for review</div>
+            </div>
+            <button class="btn btn-outline-dark">Submit</button>
+        </form>
+        <% } %>
+    </div>
+
+    <div class="col-8 offset-3">
+        <hr>
+        <h4>All Reviews</h4>
+        <ul>
+            <div class="row">
+                <% for(review of item.review) { %>
+                    <!-- <li>stars</li> -->
+                    <div class="card col-5 ms-3 mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">@<%= review.author.username %></h5>
+                            <p class="starability-result card-text flex flex-wrap" data-rating="<%= review.rating %>"></p>
+                            <p class="card-text"><%= review.comment %></p>
+                            <form action="/listings/<%= item._id %>/reviews/<%= review._id %>?_method=DELETE" class="mb-3" method="post">
+                                <button class="btn btn-sm btn-dark">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+        </ul>
+    </div>
+
+    <div class="col-8 offset-3 mt-3">
+        <hr>
+        <h3>Where You'll Be</h3>
+        <div id="map" class="col-12 mb-3"></div>
+    </div>
+    
+    
+    <script>
+        // Example starter JavaScript for disabling form submissions if there are invalid fields
+        (function () {
+            'use strict';
+    
+            window.addEventListener('load', function () {
+                // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                var forms = document.getElementsByClassName('needs-validation');
+    
+                // Loop over them and prevent submission
+                Array.prototype.filter.call(forms, function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+    
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+
+        
+    </script>
+
+    <script>
+        // let maptoken = 
+        // // console.log(maptoken);
+        // mapboxgl.accessToken = maptoken;
+        // const map = new mapboxgl.Map({
+        //     container: 'map', // container ID
+        //     center: listing.geometry.coordinates, // starting position [lng, lat]. Note that lat must be set between -90 and 90
+        //     zoom: 9 // starting zoom
+        // });
+
+        // const marker = new mapboxgl.Marker({ color: 'black'})
+        // .setLngLat(listing.geometry.coordinates)
+        // .setPopup(new mapboxgl.Popup({offset:25}))
+        // .setHTML(`<h4>${listing.location}</h4><p>exact location provided after booking!</p>`)
+        // .addTo(map);
+    // listing.geometry.coordinates = [72.8777, 19.0760];
+
+    let maptoken = "<%= process.env.MAP_TOKEN %>";
+    mapboxgl.accessToken = maptoken;
+
+    // Initialize the map
+    const map = new mapboxgl.Map({
+        container: 'map', // Container ID
+        style: 'mapbox://styles/mapbox/streets-v12', // Map style
+        center: [72.8777, 19.0760], // Starting position [lng, lat]
+        zoom: 12 // Starting zoom level
+    });
+
+    // Add marker to the map
+    const marker = new mapboxgl.Marker({ color: 'black' })
+        .setLngLat([72.8777, 19.0760])
+        .setPopup(
+            new mapboxgl.Popup({ offset: 25 }) // Add pop-up
+                .setHTML(`<h4>${listing.location}</h4><p>Exact location provided after booking!</p>`)
+        )
+        .addTo(map);
+    </script>
+</body>
