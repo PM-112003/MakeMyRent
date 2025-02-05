@@ -137,6 +137,7 @@ app.all("*", (req, res, next) => {
 app.use((err,req,res,next)=>{
     let {statusCode = 500, message = "hang ho gya!"} = err;
     // res.render("error.ejs", { message });
+    console.log(err);
     res.status(statusCode).send(message);
     // res.send(message)
 })
