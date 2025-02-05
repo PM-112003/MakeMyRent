@@ -1,5 +1,5 @@
-const Listing = require("../Backend/models/listing.js");
-const Review = require("../Backend/models/reviews.js");
+const Listing = require("./models/listing.js");
+const Review = require("./models/reviews.js");
 
 module.exports.isLoggedIn = (req, res, next) => {
     if(!req.isAuthenticated()){
